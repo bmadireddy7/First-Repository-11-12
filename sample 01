@@ -1,30 +1,24 @@
 import pandas as pd
 import os
 
-# Set your Downloads folder and file paths
-downloads_folder = os.path.expanduser("~/Downloads")
-input_filename = "your_input_filename.csv" # Change to your CSV file name
-input_filepath = os.path.join(downloads_folder, input_filename)
-output_filename = "output.csv"
-output_filepath = os.path.join(downloads_folder, output_filename)
+# Adjust file paths for Windows
+input_filepath = r"C:\Downloads\test\your_input_filename.csv"  # <-- Change to your actual file name
+output_filepath = r"C:\Downloads\test\output.csv"
 
-# Read data
+# Read your CSV file
 df = pd.read_csv(input_filepath, dtype={'Id': str})
 
-# Create normalized name combination by sorting Fname and Lname per row
+# Create normalized name combination so order doesn't matter
 def make_normalized_name(row):
-    names = sorted([row['Fname'], row['Lname']])
-    return ' '.join(names)
+    return ' '.join(sorted([row['Fname'], row['Lname']]))
 
 df['normalized_name'] = df.apply(make_normalized_name, axis=1)
 
-# Sort DataFrame by normalized name and then by Id for consistent ordering within each group
+# Sort/group by normalized_name and Id
 df_sorted = df.sort_values(['normalized_name', 'Id'])
 
-# Drop the helper column before saving
+# Drop helper column and save output
 df_sorted = df_sorted.drop(columns=['normalized_name'])
-
-# Save output to CSV
 df_sorted.to_csv(output_filepath, index=False)
 
 print(f"Output written to: {output_filepath}")
