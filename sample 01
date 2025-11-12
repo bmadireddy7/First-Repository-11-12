@@ -1,27 +1,30 @@
 import pandas as pd
 
-# Folder and file paths (Windows format)
+# File paths
 input_filepath = r"C:\Downloads\test\your_input_filename.csv"  # Change to your actual file name
 output_filepath = r"C:\Downloads\test\output.csv"
 
-# Read CSV file
+# Read CSV
 df = pd.read_csv(input_filepath, dtype={'Id': str})
 
-# Create normalized name by sorting fname and lname alphabetically
-def make_normalized_name(row):
+# Compute normalized names for each row
+def make_normalized(row):
     return ' '.join(sorted([row['Fname'], row['Lname']]))
 
-# Add grouping for normalized name
-df['normalized_name'] = df.apply(make_normalized_name, axis=1)
+df['normalized_name'] = df.apply(make_normalized, axis=1)
 
-# Add Status column: "match" if Name equals normalized_name, else blank
-df['Status'] = df.apply(lambda row: 'match' if row['Name'] == row['normalized_name'] else '', axis=1)
+# Count duplicates of each normalized_name among Name column
+df['is_group'] = df.groupby('normalized_name')['Name'].transform('count')
 
-# Sort/group by normalized_name and Id (optional, for aesthetic/order)
+# Assign 'match' to all rows in groups of size 2+ where Name equals normalized_name
+df['Status'] = df.apply(lambda row: 'match' if df[(df['normalized_name'] == row['normalized_name'])].shape[0] > 1 else '', axis=1)
+
+# Optional: sort/order/group as you prefer
 df_sorted = df.sort_values(['normalized_name', 'Id'])
 
-# Drop helper column and save output
-df_sorted = df_sorted.drop(columns=['normalized_name'])
-df_sorted.to_csv(output_filepath, index=False)
+# Drop helper columns
+df_sorted = df_sorted.drop(columns=['normalized_name', 'is_group'])
 
+# Save
+df_sorted.to_csv(output_filepath, index=False)
 print(f"Output written to: {output_filepath}")
