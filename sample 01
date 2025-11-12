@@ -1,20 +1,23 @@
 import pandas as pd
-import os
 
-# Adjust file paths for Windows
-input_filepath = r"C:\Downloads\test\your_input_filename.csv"  # <-- Change to your actual file name
+# Folder and file paths (Windows format)
+input_filepath = r"C:\Downloads\test\your_input_filename.csv"  # Change to your actual file name
 output_filepath = r"C:\Downloads\test\output.csv"
 
-# Read your CSV file
+# Read CSV file
 df = pd.read_csv(input_filepath, dtype={'Id': str})
 
-# Create normalized name combination so order doesn't matter
+# Create normalized name by sorting fname and lname alphabetically
 def make_normalized_name(row):
     return ' '.join(sorted([row['Fname'], row['Lname']]))
 
+# Add grouping for normalized name
 df['normalized_name'] = df.apply(make_normalized_name, axis=1)
 
-# Sort/group by normalized_name and Id
+# Add Status column: "match" if Name equals normalized_name, else blank
+df['Status'] = df.apply(lambda row: 'match' if row['Name'] == row['normalized_name'] else '', axis=1)
+
+# Sort/group by normalized_name and Id (optional, for aesthetic/order)
 df_sorted = df.sort_values(['normalized_name', 'Id'])
 
 # Drop helper column and save output
