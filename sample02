@@ -1,0 +1,17 @@
+import pandas as pd
+
+# File paths
+input_filepath = r"C:\Downloads\test\your_input_filename.csv"  # Change this to your actual file name
+output_filepath = r"C:\Downloads\test\output.csv"
+
+# Read CSV file
+df = pd.read_csv(input_filepath, dtype={'Id': str})
+
+# Mark 'match' for all duplicated DOB values (including the first instance)
+df['Status'] = df.duplicated(subset=['DOB'], keep=False).map({True: 'match', False: ''})
+
+# Save with the desired column order
+df = df[['Id', 'DOB', 'Status']]
+df.to_csv(output_filepath, index=False)
+
+print(f"Output written to: {output_filepath}")
